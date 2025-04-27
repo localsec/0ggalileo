@@ -201,12 +201,12 @@ function addLog(message, type) {
 function clearTransactionLogs() {
   transactionLogs = [];
   updateLogs();
-  addLog("Transaction logs telah dihapus.", "system");
+  addLog("Nhật ký giao dịch đã bị xóa.", "system");
 }
 
 const screen = blessed.screen({
   smartCSR: true,
-  title: "NT Exhaust",
+  title: "LocalSec",
   fullUnicode: true,
   mouse: true
 });
@@ -219,7 +219,7 @@ const headerBox = blessed.box({
   style: { fg: "white" }
 });
 figlet.text("NT EXHAUST", { font: "Speed", horizontalLayout: "default" }, (err, data) => {
-  if (err) headerBox.setContent("{center}{bold}NT EXHAUST{/bold}{/center}");
+  if (err) headerBox.setContent("{center}{bold}LocalSec{/bold}{/center}");
   else headerBox.setContent(`{center}{bold}{green-fg}${data}{/green-fg}{/bold}{/center}`);
   screen.render();
 });
@@ -290,7 +290,7 @@ async function updateGasPriceBox() {
     gasPriceBox.setContent(content);
     screen.render();
   } catch (error) {
-    addLog("Không cập nhật được Giá gas: " + error.message, "error");
+    addLog("thất bại cập nhật Gas Price Box: " + error.message, "error");
   }
 }
 setInterval(updateGasPriceBox, 10000);
@@ -298,7 +298,7 @@ updateGasPriceBox();
 
 function updateMainMenuItems() {
   const baseItems = ["0g Swap", "Hàng đợi giao dịch", "Xóa Nhật ký giao dịch", "Refresh", "Exit"];
-  if (transactionRunning) baseItems.splice(1, 0, "Stop All Transactions");
+  if (transactionRunning) baseItems.splice(1, 0, "Dừng tất cả các giao dịch");
   mainMenu.setItems(baseItems);
   screen.render();
 }
@@ -314,13 +314,13 @@ const mainMenu = blessed.list({
 });
 
 function update0gSwapSubMenuItems() {
-  const items = ["Tự động Swap USDT & ETH", "Tự động Swap USDT & BTC", "Tự động Swap BTC & ETH", "Xóa Nhật ký giao dịch", "Quay lại Menu chính", "Exit"];
-  if (transactionRunning) items.unshift("Stop Transaction");
-  Tự độngSwapSubMenu.setItems(items);
+  const items = ["Auto Swap USDT & ETH", "Auto Swap USDT & BTC", "Auto Swap BTC & ETH", "Xóa Nhật ký giao dịch", "Back To Main Menu", "Exit"];
+  if (transactionRunning) items.unshift("Dừng giao dịch");
+  autoSwapSubMenu.setItems(items);
   screen.render();
 }
-const Tự độngSwapSubMenu = blessed.list({
-  label: " Tự động Swap Menu ",
+const autoSwapSubMenu = blessed.list({
+  label: " Auto Swap Menu ",
   left: "60%",
   keys: true,
   vi: true,
@@ -329,7 +329,7 @@ const Tự độngSwapSubMenu = blessed.list({
   style: { selected: { bg: "blue", fg: "white" }, border: { fg: "yellow" }, fg: "white" },
   items: []
 });
-Tự độngSwapSubMenu.hide();
+autoSwapSubMenu.hide();
 
 const queueMenu = blessed.box({
   label: " Hàng đợi giao dịch ",
@@ -418,7 +418,7 @@ async function updateWalletData() {
     screen.render();
     addLog("Dữ liệu ví đã được cập nhật thành công.", "system");
   } catch (error) {
-    addLog("Không thể lấy dữ liệu ví: " + error.message, "error");
+    addLog("Lấy dữ liệu ví thất bại: " + error.message, "error");
   }
 }
 
@@ -427,7 +427,7 @@ async function approveToken(tokenAddress, tokenAbi, amount, decimals) {
     const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, wallet);
     const currentAllowance = await tokenContract.allowance(wallet.address, ROUTER_ADDRESS);
     if (currentAllowance >= amount) {
-      addLog(`0G: Không cần phê duyệt, đã tồn tại`, "system");
+      addLog(`0G: Không cần phê duyệt, lệnh đã tồn tại`, "system");
       return;
     }
     const feeData = await provider.getFeeData();
@@ -445,13 +445,13 @@ async function approveToken(tokenAddress, tokenAbi, amount, decimals) {
   }
 }
 
-async function swapTự động(direction, amountIn) {
+async function swapAuto(direction, amountIn) {
   try {
     const swapContract = new ethers.Contract(ROUTER_ADDRESS, CONTRACT_ABI, wallet);
     let params;
     const deadline = Math.floor(Date.now() / 1000) + 120;
     if (direction === "usdtToEth") {
-      addLog(`0G: Bắt đầu hoán đổi USDT ➯ ETH số lượng: ${ethers.formatUnits(amountIn, 18)} USDT`, "0g");
+      addLog(`0G: Bắt đầu Swap USDT ➯ ETH Số lượng: ${ethers.formatUnits(amountIn, 18)} USDT`, "0g");
       params = {
         tokenIn: USDT_ADDRESS,
         tokenOut: ETH_ADDRESS,
@@ -463,7 +463,7 @@ async function swapTự động(direction, amountIn) {
         sqrtPriceLimitX96: 0n,
       };
     } else if (direction === "ethToUsdt") {
-      addLog(`0G: Bắt đầu hoán đổi ETH ➯ USDT Với số lượng: ${ethers.formatUnits(amountIn, 18)} ETH`, "0g");
+      addLog(`0G: Bắt đầu Swap ETH ➯ USDT Số lượng: ${ethers.formatUnits(amountIn, 18)} ETH`, "0g");
       params = {
         tokenIn: ETH_ADDRESS,
         tokenOut: USDT_ADDRESS,
@@ -475,7 +475,7 @@ async function swapTự động(direction, amountIn) {
         sqrtPriceLimitX96: 0n,
       };
     } else if (direction === "usdtToBtc") {
-      addLog(`0G: Bắt đầu hoán đổi USDT ➯ BTC Với số lượng: ${ethers.formatUnits(amountIn, 18)} USDT`, "0g");
+      addLog(`0G: Bắt đầu Swap USDT ➯ BTC Số lượng: ${ethers.formatUnits(amountIn, 18)} USDT`, "0g");
       params = {
         tokenIn: USDT_ADDRESS,
         tokenOut: BTC_ADDRESS,
@@ -487,7 +487,7 @@ async function swapTự động(direction, amountIn) {
         sqrtPriceLimitX96: 0n,
       };
     } else if (direction === "btcToUsdt") {
-      addLog(`0G: Bắt đầu hoán đổi BTC ➯ USDT Với số lượng: ${ethers.formatUnits(amountIn, 18)} BTC`, "0g");
+      addLog(`0G: Bắt đầu Swap BTC ➯ USDT Số lượng: ${ethers.formatUnits(amountIn, 18)} BTC`, "0g");
       params = {
         tokenIn: BTC_ADDRESS,
         tokenOut: USDT_ADDRESS,
@@ -499,7 +499,7 @@ async function swapTự động(direction, amountIn) {
         sqrtPriceLimitX96: 0n,
       };
     } else if (direction === "btcToEth") {
-      addLog(`0G: Bắt đầu hoán đổi BTC ➯ ETH Với số lượng: ${ethers.formatUnits(amountIn, 18)} BTC`, "0g");
+      addLog(`0G: Bắt đầu Swap BTC ➯ ETH Số lượng: ${ethers.formatUnits(amountIn, 18)} BTC`, "0g");
       params = {
         tokenIn: BTC_ADDRESS,
         tokenOut: ETH_ADDRESS,
@@ -511,7 +511,7 @@ async function swapTự động(direction, amountIn) {
         sqrtPriceLimitX96: 0n,
       };
     } else if (direction === "ethToBtc") {
-      addLog(`0G: Bắt đầu hoán đổi ETH ➯ BTC Với số lượng: ${ethers.formatUnits(amountIn, 18)} ETH`, "0g");
+      addLog(`0G: Bắt đầu Swap ETH ➯ BTC Số lượng: ${ethers.formatUnits(amountIn, 18)} ETH`, "0g");
       params = {
         tokenIn: ETH_ADDRESS,
         tokenOut: BTC_ADDRESS,
@@ -532,21 +532,21 @@ async function swapTự động(direction, amountIn) {
     });
     addLog(`0G: Swap Tx Dikirim: ${shortHash(tx.hash)}`, "0g");
     const receipt = await tx.wait();
-    addLog(`0G: Swap Tx Thành công: ${shortHash(tx.hash)}`, "0g");
+    addLog(`0G: Giao dịch hoán đổi Tx thành công: ${shortHash(tx.hash)}`, "0g");
     const feeAOGI = ethers.formatEther(receipt.gasUsed * selectedGasPrice);
     addLog(`0G: Phí giao dịch: ${feeAOGI} AOGI`, "0g");
-    addLog(`0GSwap: Swap ${direction} Thành công.`, "0g");
+    addLog(`0GSwap: Swap ${direction} thành công.`, "0g");
   } catch (error) {
     if (error.message && error.message.toLowerCase().includes("nonce")) {
       nextNonce = await provider.getTransactionCount(wallet.address, "pending");
-      addLog(`Nonce direfresh: ${nextNonce}`, "system");
+      addLog(`Nonce làm mới: ${nextNonce}`, "system");
     }
-    addLog(`0GSwap: Swap ${direction} gagal: ${error.message}`, "error");
+    addLog(`0GSwap: Swap ${direction} thất bại: ${error.message}`, "error");
     throw error;
   }
 }
 
-async function Tự độngSwapUsdtEth(totalSwaps) {
+async function autoSwapUsdtEth(totalSwaps) {
   try {
     for (let i = 1; i <= totalSwaps; i++) {
       if (!transactionRunning) {
@@ -559,11 +559,11 @@ async function Tự độngSwapUsdtEth(totalSwaps) {
           const usdtContract = new ethers.Contract(USDT_ADDRESS, USDT_ABI, provider);
           const currentUsdtBalance = await usdtContract.balanceOf(wallet.address);
           if (currentUsdtBalance < usdtAmount) {
-            addLog(`0G: Sự cân bằng USDT (${ethers.formatUnits(currentUsdtBalance, 18)}) không đủ để trao đổi USDT->ETH`, "error");
+            addLog(`0G: Sự cân bằng USDT (${ethers.formatUnits(currentUsdtBalance, 18)}) không đủ cho swap USDT->ETH`, "error");
           } else {
             await addTransactionToQueue(async (nonce) => {
               await approveToken(USDT_ADDRESS, USDT_ABI, usdtAmount, 18);
-              await swapTự động("usdtToEth", usdtAmount);
+              await swapAuto("usdtToEth", usdtAmount);
               await updateWalletData();
             }, `USDT ➯ ETH, ${randomUsdt} USDT`);
           }
@@ -577,11 +577,11 @@ async function Tự độngSwapUsdtEth(totalSwaps) {
           const ethContract = new ethers.Contract(ETH_ADDRESS, ETH_ABI, provider);
           const currentEthBalance = await ethContract.balanceOf(wallet.address);
           if (currentEthBalance < ethAmount) {
-            addLog(`0G: Sự cân bằng ETH (${ethers.formatUnits(currentEthBalance, 18)}) không đủ để trao đổi ETH->USDT`, "error");
+            addLog(`0G: Sự cân bằng ETH (${ethers.formatUnits(currentEthBalance, 18)}) không đủ cho swap ETH->USDT`, "error");
           } else {
             await addTransactionToQueue(async (nonce) => {
               await approveToken(ETH_ADDRESS, ETH_ABI, ethAmount, 18);
-              await swapTự động("ethToUsdt", ethAmount);
+              await swapAuto("ethToUsdt", ethAmount);
               await updateWalletData();
             }, `ETH ➯ USDT, ${randomEth} ETH`);
           }
@@ -595,12 +595,12 @@ async function Tự độngSwapUsdtEth(totalSwaps) {
         addLog(`0GSwap: Chờ ${delaySeconds} giây trước khi hoán đổi tiếp theo...`, "0g");
         await interruptibleDelay(delaySeconds * 1000);
         if (!transactionRunning) {
-          addLog("0GSwap: Tự động Swap Đã dừng trong thời gian chờ đợi", "0g");
+          addLog("0GSwap: Auto Swap Dihentikan pada saat waktu tunggu", "0g");
           break;
         }
       }
     }
-    addLog("0GSwap: Tất cả các giao dịch hoán đổi USDT & ETH hoàn thành.", "0g");
+    addLog("0GSwap: Tất cả swap USDT & ETH hoàn thành.", "0g");
   } catch (error) {
     addLog(`0GSwap: Error: ${error.message}`, "error");
   } finally {
@@ -608,7 +608,7 @@ async function Tự độngSwapUsdtEth(totalSwaps) {
   }
 }
 
-async function Tự động SwapUsdtBtc(totalSwaps) {
+async function autoSwapUsdtBtc(totalSwaps) {
   try {
     for (let i = 1; i <= totalSwaps; i++) {
       if (!transactionRunning) {
@@ -621,11 +621,11 @@ async function Tự động SwapUsdtBtc(totalSwaps) {
           const usdtContract = new ethers.Contract(USDT_ADDRESS, USDT_ABI, provider);
           const currentUsdtBalance = await usdtContract.balanceOf(wallet.address);
           if (currentUsdtBalance < usdtAmount) {
-            addLog(`0G: Sự cân bằng USDT (${ethers.formatUnits(currentUsdtBalance, 18)}) không đủ để trao đổi USDT->BTC`, "error");
+            addLog(`0G: Sự cân bằng USDT (${ethers.formatUnits(currentUsdtBalance, 18)}) không đủ cho swap USDT->BTC`, "error");
           } else {
             await addTransactionToQueue(async (nonce) => {
               await approveToken(USDT_ADDRESS, USDT_ABI, usdtAmount, 18);
-              await swapTự động("usdtToBtc", usdtAmount);
+              await swapAuto("usdtToBtc", usdtAmount);
               await updateWalletData();
             }, `USDT ➯ BTC, ${randomUsdt} USDT`);
           }
@@ -639,11 +639,11 @@ async function Tự động SwapUsdtBtc(totalSwaps) {
           const btcContract = new ethers.Contract(BTC_ADDRESS, BTC_ABI, provider);
           const currentBtcBalance = await btcContract.balanceOf(wallet.address);
           if (currentBtcBalance < btcAmount) {
-            addLog(`0G: Sự cân bằng BTC (${ethers.formatUnits(currentBtcBalance, 18)}) không đủ để trao đổi BTC->USDT`, "error");
+            addLog(`0G: Sự cân bằng BTC (${ethers.formatUnits(currentBtcBalance, 18)}) không đủ cho swap BTC->USDT`, "error");
           } else {
             await addTransactionToQueue(async (nonce) => {
               await approveToken(BTC_ADDRESS, BTC_ABI, btcAmount, 18);
-              await swapTự động("btcToUsdt", btcAmount);
+              await swapAuto("btcToUsdt", btcAmount);
               await updateWalletData();
             }, `BTC ➯ USDT, ${randomBtc} BTC`);
           }
@@ -654,15 +654,15 @@ async function Tự động SwapUsdtBtc(totalSwaps) {
       addLog(`0GSwap: Swap Kr ${i} hoàn thành.`, "success");
       if (i < totalSwaps) {
         const delaySeconds = Math.floor(Math.random() * (60 - 30 + 1)) + 30;
-        addLog(`0GSwap: Chờ đợi ${delaySeconds} giây trước khi hoán đổi tiếp theo...`, "0g");
+        addLog(`0GSwap: Chờ ${delaySeconds} giây trước khi hoán đổi tiếp theo...`, "0g");
         await interruptibleDelay(delaySeconds * 1000);
         if (!transactionRunning) {
-          addLog("0GSwap: Tự động hoán đổi dừng lại trong thời gian chờ.", "0g");
+          addLog("0GSwap: Tự động hoán đổi bị dừng trong thời gian chờ.", "0g");
           break;
         }
       }
     }
-    addLog("0GSwap: Tất cả các giao dịch hoán đổi USDT & BTC hoàn thành.", "0g");
+    addLog("0GSwap: Tất cả giao dịch USDT & BTC hoàn thành.", "0g");
   } catch (error) {
     addLog(`0GSwap: Error : ${error.message}`, "error");
   } finally {
@@ -670,7 +670,7 @@ async function Tự động SwapUsdtBtc(totalSwaps) {
   }
 }
 
-async function Tự độngSwapBtcEth(totalSwaps) {
+async function autoSwapBtcEth(totalSwaps) {
   try {
     for (let i = 1; i <= totalSwaps; i++) {
       if (!transactionRunning) {
@@ -683,11 +683,11 @@ async function Tự độngSwapBtcEth(totalSwaps) {
           const btcContract = new ethers.Contract(BTC_ADDRESS, BTC_ABI, provider);
           const currentBtcBalance = await btcContract.balanceOf(wallet.address);
           if (currentBtcBalance < btcAmount) {
-            addLog(`0G: Sự cân bằng BTC (${ethers.formatUnits(currentBtcBalance, 18)}) không đủ để trao đổi BTC->ETH`, "error");
+            addLog(`0G: Sự cân bằng BTC (${ethers.formatUnits(currentBtcBalance, 18)}) không đủ cho swap BTC->ETH`, "error");
           } else {
             await addTransactionToQueue(async (nonce) => {
               await approveToken(BTC_ADDRESS, BTC_ABI, btcAmount, 18);
-              await swapTự động("btcToEth", btcAmount);
+              await swapAuto("btcToEth", btcAmount);
               await updateWalletData();
             }, `BTC ➯ ETH, ${randomBtc} BTC`);
           }
@@ -701,11 +701,11 @@ async function Tự độngSwapBtcEth(totalSwaps) {
           const ethContract = new ethers.Contract(ETH_ADDRESS, ETH_ABI, provider);
           const currentEthBalance = await ethContract.balanceOf(wallet.address);
           if (currentEthBalance < ethAmount) {
-            addLog(`0G: Sự cân bằng ETH (${ethers.formatUnits(currentEthBalance, 18)}) không đủ để trao đổi ETH->BTC`, "error");
+            addLog(`0G: Sự cân bằng ETH (${ethers.formatUnits(currentEthBalance, 18)}) không đủ cho swap ETH->BTC`, "error");
           } else {
             await addTransactionToQueue(async (nonce) => {
               await approveToken(ETH_ADDRESS, ETH_ABI, ethAmount, 18);
-              await swapTự động("ethToBtc", ethAmount);
+              await swapAuto("ethToBtc", ethAmount);
               await updateWalletData();
             }, `ETH ➯ BTC, ${randomEth} ETH`);
           }
@@ -716,17 +716,17 @@ async function Tự độngSwapBtcEth(totalSwaps) {
       addLog(`0GSwap: Hoán đổi${i} hoàn thành.`, "0g");
       if (i < totalSwaps) {
         const delaySeconds = Math.floor(Math.random() * (60 - 30 + 1)) + 30;
-        addLog(`0GSwap: Chờ đợi ${delaySeconds} giây trước khi hoán đổi tiếp theo...`, "progress");
+        addLog(`0GSwap: Chờ ${delaySeconds} giây trước khi hoán đổi tiếp theo...`, "progress");
         await interruptibleDelay(delaySeconds * 1000);
         if (!transactionRunning) {
-          addLog("0GSwap: Tự động hoán đổi dừng lại trong thời gian chờ.", "0g");
+          addLog("0GSwap: Tự động hoán đổi bị dừng trong thời gian chờ.", "0g");
           break;
         }
       }
     }
-    addLog("0GSwap: Tất cả các giao dịch hoán đổi BTC & ETH hoàn thành.", "success");
+    addLog("0GSwap: Tất cả swap BTC & ETH hoàn thành.", "success");
   } catch (error) {
-    addLog(`0GSwap: Error Tự độngSwapBtcEth: ${error.message}`, "error");
+    addLog(`0GSwap: Error autoSwapBtcEth: ${error.message}`, "error");
   } finally {
     stopTransaction();
   }
@@ -761,7 +761,7 @@ function addTransactionToQueue(transactionFunction, description = "Transaksi") {
         addLog(`Nonce direfresh: ${nextNonce}`, "system");
       }
       updateTransactionStatus(transactionId, "error");
-      addLog(`Transaksi [${transactionId}] gagal: ${error.message}`, "system");
+      addLog(`Transaksi [${transactionId}] thất bại: ${error.message}`, "system");
     } finally {
       removeTransactionFromQueue(transactionId);
       updateQueueDisplay();
@@ -780,7 +780,7 @@ function removeTransactionFromQueue(id) {
   updateQueueDisplay();
 }
 function getTransactionQueueContent() {
-  if (transactionQueueList.length === 0) return "Tidak ada transaksi dalam antrean.";
+  if (transactionQueueList.length === 0) return "Không có giao dịch nào trong hàng đợi.";
   return transactionQueueList.map(tx => `ID: ${tx.id} | ${tx.description} | ${tx.status} | ${tx.timestamp}`).join("\n");
 }
 function updateQueueDisplay() {
@@ -812,40 +812,40 @@ function stopTransaction() {
 function stopAllTransactions() {
   if (transactionRunning) {
     stopTransaction();
-    addLog("Stop All Transactions command received. Semua transaksi telah dihentikan.", "system");
+    addLog("Dừng tất cả các giao dịch lệnh đã nhận được. Tất cả giao dịch đã bị dừng lại.", "system");
   } else {
-    addLog("Tidak ada transaksi yang berjalan.", "system");
+    addLog("Không có giao dịch nào đang chạy.", "system");
   }
 }
 
 function startTransactionProcess(pair, totalSwaps) {
   chooseGasFee().then(gasPrice => {
     selectedGasPrice = gasPrice;
-    addLog(`Gas fee yang dipilih: ${ethers.formatUnits(selectedGasPrice, "gwei")} Gwei`, "system");
+    addLog(`Gas fee: ${ethers.formatUnits(selectedGasPrice, "gwei")} Gwei`, "system");
     transactionRunning = true;
     chosenSwap = pair;
     updateMainMenuItems();
     update0gSwapSubMenuItems();
-    addLog(`Memulai ${pair} sebanyak ${totalSwaps} kali...`, "progress");
+    addLog(`Bắt đầu ${pair} số lượng ${totalSwaps} thời gian...`, "progress");
     if (pair === "USDT & ETH") {
-      Tự độngSwapUsdtEth(totalSwaps);
+      autoSwapUsdtEth(totalSwaps);
     } else if (pair === "USDT & BTC") {
-      Tự độngSwapUsdtBtc(totalSwaps);
+      autoSwapUsdtBtc(totalSwaps);
     } else if (pair === "BTC & ETH") {
-      Tự độngSwapBtcEth(totalSwaps);
+      autoSwapBtcEth(totalSwaps);
     } else {
-      addLog(`Logika swap untuk pasangan ${pair} belum diimplementasikan.`, "error");
+      addLog(`Hoán đổi logic cho các cặp ${pair} chưa được thực hiện.`, "error");
       stopTransaction();
     }
   }).catch(err => {
-    addLog("Pemilihan gas fee dibatalkan: " + err, "system");
+    addLog("Duyệt phí gas bị hủy bỏ: " + err, "system");
   });
 }
 
 async function chooseGasFee() {
   return new Promise((resolve, reject) => {
     const container = blessed.box({
-      label: ' Pilih Gas Fee ',
+      label: ' Chọn Phí Gas ',
       top: 'center',
       left: 'center',
       width: '50%',
@@ -860,7 +860,7 @@ async function chooseGasFee() {
       left: 0,
       width: '100%',
       height: 5,
-      items: ['Gas Normal', 'Gas Rendah', 'Gas Fee x2'],
+      items: ['Gas Normal', 'Gas Thấp', 'Gas Fee x2'],
       keys: true,
       mouse: true,
       style: { selected: { bg: 'blue', fg: 'white' } },
@@ -887,7 +887,7 @@ async function chooseGasFee() {
     });
     cancelButton.on('press', () => {
       container.destroy();
-      Tự độngSwapSubMenu.focus();
+      autoSwapSubMenu.focus();
       screen.render();
     });
     container.append(cancelButton);
@@ -907,7 +907,7 @@ async function chooseGasFee() {
         } else if (index === 2) {
           resolve(gasPriceBN * 2n); 
         }
-        Tự độngSwapSubMenu.focus();
+        autoSwapSubMenu.focus();
         screen.render();
         resolve(selected);
 
@@ -920,12 +920,12 @@ mainMenu.on("select", (item) => {
   const selected = item.getText();
   if (selected === "0g Swap") {
     mainMenu.hide();
-    Tự độngSwapSubMenu.show();
-    Tự độngSwapSubMenu.focus();
+    autoSwapSubMenu.show();
+    autoSwapSubMenu.focus();
     screen.render();
   } else if (selected === "Hàng đợi giao dịch") {
     showTransactionQueueMenu();
-  } else if (selected === "Stop All Transactions") {
+  } else if (selected === "Dừng tất cả các giao dịch") {
     stopAllTransactions();
   } else if (selected === "Xóa Nhật ký giao dịch") {
     logsBox.setContent("");
@@ -936,70 +936,70 @@ mainMenu.on("select", (item) => {
     process.exit(0);
   }
 });
-Tự độngSwapSubMenu.on("select", (item) => {
+autoSwapSubMenu.on("select", (item) => {
   const selected = item.getText();
-  if (transactionRunning && !["Stop Transaction", "Xóa Nhật ký giao dịch", "Quay lại Menu chính", "Exit"].includes(selected)) {
-    addLog("Sedang Ada Transaksi Yang Berjalan . Stop transaction terlebih dahulu.", "system");
+  if (transactionRunning && !["Dừng giao dịch", "Xóa Nhật ký giao dịch", "Back To Main Menu", "Exit"].includes(selected)) {
+    addLog("Có một giao dịch đang diễn ra . Dừng giao dịch trước khi tiếp tục.", "system");
     return;
   }
-  if (selected.startsWith("Tự động Swap USDT & ETH")) {
+  if (selected.startsWith("Auto Swap USDT & ETH")) {
     promptBox.setLabel("{bright-blue-fg}Jumlah Swap (USDT & ETH){/bright-blue-fg}");
     promptBox.setFront();
-    promptBox.readInput("Masukkan jumlah swap:", "", async (err, value) => {
+    promptBox.readInput("Đi vào jumlah swap:", "", async (err, value) => {
       promptBox.hide();
       screen.render();
       if (err || !value) {
-        addLog("Input jumlah swap dibatalkan.", "system");
+        addLog("Nhập jumlah swap đã hủy bỏ.", "system");
         return;
       }
       const totalSwaps = parseInt(value);
       if (isNaN(totalSwaps) || totalSwaps <= 0) {
-        addLog("Jumlah swap tidak valid. Masukkan angka > 0.", "error");
+        addLog("Jumlah swap không hợp lệ. phải nhập số lượng > 0.", "error");
         return;
       }
       startTransactionProcess("USDT & ETH", totalSwaps);
     });
-  } else if (selected.startsWith("Tự động Swap USDT & BTC")) {
+  } else if (selected.startsWith("Auto Swap USDT & BTC")) {
     promptBox.setLabel("{bright-blue-fg}Jumlah Swap (USDT & BTC){/bright-blue-fg}");
     promptBox.setFront();
-    promptBox.readInput("Masukkan jumlah swap:", "", async (err, value) => {
+    promptBox.readInput("Bắt đầu jumlah swap:", "", async (err, value) => {
       promptBox.hide();
       screen.render();
       if (err || !value) {
-        addLog("Input jumlah swap dibatalkan.", "system");
+        addLog("Nhập số lượng jumlah swap.", "system");
         return;
       }
       const totalSwaps = parseInt(value);
       if (isNaN(totalSwaps) || totalSwaps <= 0) {
-        addLog("Jumlah swap tidak valid. Masukkan angka > 0.", "error");
+        addLog("Jumlah swap không hợp lệ. nhập số lượng > 0.", "error");
         return;
       }
       startTransactionProcess("USDT & BTC", totalSwaps);
     });
-  } else if (selected.startsWith("Tự động Swap BTC & ETH")) {
+  } else if (selected.startsWith("Auto Swap BTC & ETH")) {
     promptBox.setLabel("{bright-blue-fg}Jumlah Swap (BTC & ETH){/bright-blue-fg}");
     promptBox.setFront();
-    promptBox.readInput("Masukkan jumlah swap:", "", async (err, value) => {
+    promptBox.readInput("Vào jumlah swap:", "", async (err, value) => {
       promptBox.hide();
       screen.render();
       if (err || !value) {
-        addLog("Input jumlah swap dibatalkan.", "system");
+        addLog("Nhập số lượng jumlah swap.", "system");
         return;
       }
       const totalSwaps = parseInt(value);
       if (isNaN(totalSwaps) || totalSwaps <= 0) {
-        addLog("Jumlah swap tidak valid. Masukkan angka > 0.", "error");
+        addLog("Jumlah swap không hợp lệ. Nhập số lượng > 0.", "error");
         return;
       }
       startTransactionProcess("BTC & ETH", totalSwaps);
     });
-  } else if (selected === "Stop Transaction") {
+  } else if (selected === "Dừng giao dịch") {
     stopTransaction();
   } else if (selected === "Xóa Nhật ký giao dịch") {
     logsBox.setContent("");
     clearTransactionLogs();
-  } else if (selected === "Quay lại Menu chính") {
-    Tự độngSwapSubMenu.hide();
+  } else if (selected === "Back To Main Menu") {
+    autoSwapSubMenu.hide();
     mainMenu.show();
     mainMenu.focus();
     screen.render();
@@ -1014,7 +1014,7 @@ screen.append(logsBox);
 screen.append(gasPriceBox);
 screen.append(walletBox);
 screen.append(mainMenu);
-screen.append(Tự độngSwapSubMenu);
+screen.append(autoSwapSubMenu);
 screen.append(queueMenu);
 
 function adjustLayout() {
@@ -1042,10 +1042,10 @@ function adjustLayout() {
   mainMenu.left = Math.floor(screenWidth * 0.6);
   mainMenu.width = Math.floor(screenWidth * 0.4);
   mainMenu.height = screenHeight - (headerHeight + descriptionBox.height + walletBox.height);
-  Tự độngSwapSubMenu.top = mainMenu.top;
-  Tự độngSwapSubMenu.left = mainMenu.left;
-  Tự độngSwapSubMenu.width = mainMenu.width;
-  Tự độngSwapSubMenu.height = mainMenu.height;
+  autoSwapSubMenu.top = mainMenu.top;
+  autoSwapSubMenu.left = mainMenu.left;
+  autoSwapSubMenu.width = mainMenu.width;
+  autoSwapSubMenu.height = mainMenu.height;
 
   screen.render();
 }
