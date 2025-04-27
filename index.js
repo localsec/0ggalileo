@@ -391,19 +391,19 @@ async function updateWalletData() {
   try {
     const walletAddress = wallet.address;
     const balanceNative = await provider.getBalance(walletAddress);
-    const Sự cân bằngAOGI = parseFloat(ethers.formatEther(balanceNative)).toFixed(4);
+    const saldoAOGI = parseFloat(ethers.formatEther(balanceNative)).toFixed(4);
 
     const usdtContract = new ethers.Contract(USDT_ADDRESS, USDT_ABI, provider);
     const balanceUSDT = await usdtContract.balanceOf(walletAddress);
-    const Sự cân bằngUSDT = parseFloat(ethers.formatEther(balanceUSDT)).toFixed(4);
+    const saldoUSDT = parseFloat(ethers.formatEther(balanceUSDT)).toFixed(4);
 
     const ethContract = new ethers.Contract(ETH_ADDRESS, ETH_ABI, provider);
     const balanceETH = await ethContract.balanceOf(walletAddress);
-    const Sự cân bằngETH = parseFloat(ethers.formatEther(balanceETH)).toFixed(4);
+    const saldoETH = parseFloat(ethers.formatEther(balanceETH)).toFixed(4);
 
     const btcContract = new ethers.Contract(BTC_ADDRESS, BTC_ABI, provider);
     const balanceBTC = await btcContract.balanceOf(walletAddress);
-    const Sự cân bằngBTC = parseFloat(ethers.formatUnits(balanceBTC, 18)).toFixed(4);
+    const saldoBTC = parseFloat(ethers.formatUnits(balanceBTC, 18)).toFixed(4);
 
     const content =
 `┌── Wallet Information
