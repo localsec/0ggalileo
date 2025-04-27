@@ -405,13 +405,13 @@ async function updateWalletData() {
     const balanceBTC = await btcContract.balanceOf(walletAddress);
     const saldoBTC = parseFloat(ethers.formatUnits(balanceBTC, 18)).toFixed(4);
 
-    const content =
+     const content =
 `┌── Wallet Information
 │   ├── Address : ${walletAddress.slice(0, 10)}..${walletAddress.slice(-3)}
-│   ├── AOGI    : {bright-green-fg}${Sự cân bằngAOGI}{/bright-green-fg}
-│   ├── ETH     : {bright-green-fg}${Sự cân bằngETH}{/bright-green-fg}
-│   ├── USDT    : {bright-green-fg}${Sự cân bằngUSDT}{/bright-green-fg}
-│   └── BTC     : {bright-green-fg}${Sự cân bằngBTC}{/bright-green-fg}
+│   ├── AOGI    : {bright-green-fg}${saldoAOGI}{/bright-green-fg}
+│   ├── ETH     : {bright-green-fg}${saldoETH}{/bright-green-fg}
+│   ├── USDT    : {bright-green-fg}${saldoUSDT}{/bright-green-fg}
+│   └── BTC     : {bright-green-fg}${saldoBTC}{/bright-green-fg}
 └── Network     : {bright-cyan-fg}${NETWORK_NAME}{/bright-cyan-fg}`;
       
     walletBox.setContent(content);
